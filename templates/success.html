@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+
+{% block title %}Processing Successful - Credit Card Information Parser{% endblock %}
+
+{% block additional_styles %}
+.card-header {
+    background: linear-gradient(45deg, var(--bs-success-bg-subtle), var(--bs-dark));
+}
+{% endblock %}
+
+{% block content %}
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h1 class="card-title h3 mb-0">Processing Successful!</h1>
+                    </div>
+                    <div class="card-body">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}" role="alert">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                        
+                        <div class="mb-4">
+                            <h2 class="h4">Processing Results</h2>
+                            <p>Successfully processed <strong>{{ record_count }}</strong> valid credit card records.</p>
+                            <p>The data has been exported to a formatted Excel file.</p>
+                            
+                            {% if country_filter or card_type_filter %}
+                            <div class="alert alert-info mt-3">
+                                <h3 class="h5">Applied Filters:</h3>
+                                <ul class="mb-0">
+                                    {% if country_filter %}
+                                    <li><strong>Country:</strong> {{ country_filter }}</li>
+                                    {% endif %}
+                                    {% if card_type_filter %}
+                                    <li><strong>Card Type:</strong> {{ card_type_filter }}</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            
+                            {% if notification_email %}
+                            <div class="alert alert-info mt-3">
+                                <h3 class="h5">Email Notification:</h3>
+                                <p class="mb-0">A copy of these results has been sent to <strong>{{ notification_email }}</strong>.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h2 class="h4">Download Results</h2>
+                            <p>Click the button below to download your Excel file:</p>
+                            <a href="{{ url_for('download_file', filename=output_file) }}" class="btn btn-primary">
+                                <i class="bi bi-download me-2"></i> Download Excel File
+                            </a>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i> Back to Homepage
+                            </a>
+                        </div>
+                    </div>
+                </div>
+{% endblock %}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@heroku/heroku-cli-util": "^8.0.15",
+    "git": "^0.1.5",
+    "heroku-cli": "^6.11.10",
+    "heroku-cli-util": "^8.0.12"
+  }
+}

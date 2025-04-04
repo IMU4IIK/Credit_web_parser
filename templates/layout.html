@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Credit Card Information Parser{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background: linear-gradient(45deg, var(--bs-primary-bg-subtle), var(--bs-dark));
+        }
+        .success-header {
+            background: linear-gradient(45deg, var(--bs-success-bg-subtle), var(--bs-dark));
+        }
+        .btn {
+            border-radius: 30px;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0.15rem 0.5rem rgba(var(--bs-primary-rgb), 0.5);
+        }
+        .btn-outline-secondary:hover {
+            transform: scale(1.05);
+        }
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+        }
+        .demo-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--bs-border-color);
+        }
+        {% if session.get('background_image') %}
+        body {
+            background-image: url('{{ url_for("get_background", filename=session.get("background_image")) }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+        {% endif %}
+        
+        /* Additional custom styles */
+        {% block additional_styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Credit Card Parser</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('index') %}active{% endif %}" href="{{ url_for('index') }}">
+                            <i class="bi bi-house me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('settings') %}active{% endif %}" href="{{ url_for('settings') }}">
+                            <i class="bi bi-gear me-1"></i> Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('api_docs') %}active{% endif %}" href="{{ url_for('api_docs') }}">
+                            <i class="bi bi-code-slash me-1"></i> API Docs
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="bg-dark text-center text-white-50 py-4 mt-5">
+        <div class="container">
+            <p class="mb-1">© 2025 Credit Card Parser</p>
+            <p class="mb-0">Developed by Jeremy Bosch (<a href="mailto:kroniikha@gmail.com" class="text-info">kroniikha@gmail.com</a>)</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Card Validation Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the validator elements if they exist on the page
+            const validateBtn = document.getElementById('validate_card_btn');
+            const cardInput = document.getElementById('card_number_validator');
+            const resultDiv = document.getElementById('validation_result');
+            
+            if (validateBtn && cardInput && resultDiv) {
+                validateBtn.addEventListener('click', function() {
+                    const cardNumber = cardInput.value.trim();
+                    
+                    if (!cardNumber) {
+                        showValidationResult('Please enter a credit card number.', 'warning');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    resultDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Validating...';
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = 'mt-2 text-muted';
+                    
+                    // Call the API to validate the card
+                    fetch('/api/validate-card', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ card_number: cardNumber })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.valid) {
+                            showValidationResult(
+                                `<i class="bi bi-check-circle-fill text-success me-2"></i> Valid ${data.card_type} card number.`, 
+                                'success'
+                            );
+                        } else {
+                            showValidationResult(
+                                `<i class="bi bi-x-circle-fill text-danger me-2"></i> Invalid card number.`, 
+                                'danger'
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        showValidationResult(
+                            `<i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Error validating card: ${error}`, 
+                            'warning'
+                        );
+                    });
+                });
+                
+                // Allow pressing Enter to validate
+                cardInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        validateBtn.click();
+                    }
+                });
+                
+                function showValidationResult(message, type) {
+                    resultDiv.innerHTML = message;
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = `mt-2 alert alert-${type}`;
+                }
+            }
+        });
+    </script>
+    
+    <!-- Additional scripts -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

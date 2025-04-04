@@ -1,0 +1,210 @@
+{% extends "layout.html" %}
+
+{% block title %}API Documentation - Credit Card Information Parser{% endblock %}
+
+{% block additional_styles %}
+.container {
+    max-width: 1000px;
+}
+pre {
+    background-color: var(--bs-dark);
+    padding: 15px;
+    border-radius: 5px;
+}
+.endpoint {
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--bs-border-color);
+    padding-bottom: 20px;
+}
+.endpoint:last-child {
+    border-bottom: none;
+}
+.method {
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-right: 10px;
+}
+.method.get {
+    background-color: var(--bs-success);
+    color: white;
+}
+.method.post {
+    background-color: var(--bs-primary);
+    color: white;
+}
+.url {
+    font-family: monospace;
+    font-size: 16px;
+}
+{% endblock %}
+
+{% block content %}
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="card-title h3 mb-0">API Documentation</h1>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            The Credit Card Information Parser provides a set of API endpoints for programmatic access to its functionality.
+                            Use these endpoints to integrate the parser into your applications.
+                        </p>
+
+                        <div class="endpoint">
+                            <h3>Parse Credit Card Data</h3>
+                            <div>
+                                <span class="method post">POST</span>
+                                <span class="url">/api/parse</span>
+                            </div>
+                            <p>Parse credit card data from a text file and return a JSON response with the results.</p>
+                            
+                            <h5>Request</h5>
+                            <p>Send a <code>multipart/form-data</code> request with the following fields:</p>
+                            <ul>
+                                <li><code>file</code> - The text file containing credit card data (required)</li>
+                                <li><code>country_filter</code> - Filter results by country (optional)</li>
+                                <li><code>card_type_filter</code> - Filter results by card type (optional)</li>
+                            </ul>
+                            
+                            <h5>Response</h5>
+                            <p>Returns a JSON object with:</p>
+<pre><code>{
+  "record_count": 105,
+  "filters_applied": {
+    "country": "USA",
+    "card_type": "Visa"
+  },
+  "data": [
+    {
+      "Credit Card Number": "4111111111111111",
+      "Card Type": "Visa",
+      "CVV": "123",
+      "Expiration Month": "12",
+      "Expiration Year": "23",
+      "Name": "John Doe",
+      "Address": "123 Main St",
+      "Town": "Anytown",
+      "State": "NY",
+      "ZIP Code": "12345",
+      "Phone": "555-123-4567",
+      "Email": "john@example.com",
+      "Country": "USA"
+    },
+    // More records...
+  ],
+  "truncated": true
+}</code></pre>
+                            <p>Note: The <code>data</code> field only includes the first 10 records to limit response size.</p>
+                        </div>
+
+                        <div class="endpoint">
+                            <h3>Export to Excel</h3>
+                            <div>
+                                <span class="method post">POST</span>
+                                <span class="url">/api/export</span>
+                            </div>
+                            <p>Export credit card data to an Excel file and return the file for download.</p>
+                            
+                            <h5>Request</h5>
+                            <p>Send a JSON body with:</p>
+<pre><code>{
+  "data": [
+    {
+      "Credit Card Number": "4111111111111111",
+      "Card Type": "Visa",
+      "CVV": "123",
+      "Expiration Month": "12",
+      "Expiration Year": "23",
+      "Name": "John Doe",
+      "Address": "123 Main St",
+      "Town": "Anytown",
+      "State": "NY",
+      "ZIP Code": "12345",
+      "Phone": "555-123-4567",
+      "Email": "john@example.com",
+      "Country": "USA"
+    },
+    // More records...
+  ]
+}</code></pre>
+                            
+                            <h5>Response</h5>
+                            <p>Returns an Excel file (<code>.xlsx</code>) as an attachment.</p>
+                        </div>
+
+                        <div class="endpoint">
+                            <h3>Get Card Types</h3>
+                            <div>
+                                <span class="method get">GET</span>
+                                <span class="url">/api/card-types</span>
+                            </div>
+                            <p>Get a list of all supported credit card types.</p>
+                            
+                            <h5>Response</h5>
+                            <p>Returns a JSON array of card types:</p>
+<pre><code>[
+  "Visa",
+  "Mastercard",
+  "American Express",
+  "Discover",
+  "JCB",
+  "Diners Club",
+  "Unknown"
+]</code></pre>
+                        </div>
+
+                        <div class="endpoint">
+                            <h3>Get Countries</h3>
+                            <div>
+                                <span class="method get">GET</span>
+                                <span class="url">/api/countries</span>
+                            </div>
+                            <p>Get a list of all countries found in a file.</p>
+                            
+                            <h5>Request Parameters</h5>
+                            <ul>
+                                <li><code>file_path</code> - Path to the file to scan for countries (optional, defaults to 'credit_cards.txt')</li>
+                            </ul>
+                            
+                            <h5>Response</h5>
+                            <p>Returns a JSON array of countries:</p>
+<pre><code>[
+  "USA",
+  "Canada",
+  "UK",
+  "Australia"
+]</code></pre>
+                        </div>
+
+                        <div class="endpoint">
+                            <h3>Validate Credit Card</h3>
+                            <div>
+                                <span class="method post">POST</span>
+                                <span class="url">/api/validate-card</span>
+                            </div>
+                            <p>Validate a credit card number using the Luhn algorithm and detect its type.</p>
+                            
+                            <h5>Request</h5>
+                            <p>Send a JSON body with:</p>
+<pre><code>{
+  "card_number": "4111111111111111"
+}</code></pre>
+                            
+                            <h5>Response</h5>
+                            <p>Returns a JSON object with validation results:</p>
+<pre><code>{
+  "valid": true,
+  "card_type": "Visa",
+  "card_number": "4111111111111111"
+}</code></pre>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i> Back to Homepage
+                            </a>
+                        </div>
+                    </div>
+                </div>
+{% endblock %}
